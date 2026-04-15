@@ -11,20 +11,48 @@
 <div class="app">
   <header class="app-header">
     <div class="header-inner">
-      <h1>متابعة حضور الأعضاء الخارجيين</h1>
-      <span class="semester-badge">الفصل الدراسي — 18 أسبوع</span>
+      <div class="header-logo">
+        <div class="header-logo-icon">🔬</div>
+        <div>
+          <h1>متابعة حضور الأعضاء الخارجيين</h1>
+          <div class="header-sub">كلية العلوم</div>
+        </div>
+      </div>
+      <span class="semester-badge" id="semester-badge">لم يُحدَّد الفصل بعد</span>
     </div>
   </header>
 
   <nav class="nav">
-    <button class="nav-btn active" data-screen="members">الأعضاء</button>
+    <button class="nav-btn active" data-screen="setup">إعداد الفصل</button>
+    <button class="nav-btn" data-screen="members">الأعضاء</button>
     <button class="nav-btn" data-screen="attendance">الحضور الأسبوعي</button>
     <button class="nav-btn" data-screen="report">التقارير</button>
   </nav>
 
-  <!-- ===================== SCREEN: MEMBERS ===================== -->
-  <section class="screen active" id="screen-members">
+  <!-- ===================== SCREEN: SETUP ===================== -->
+  <section class="screen active" id="screen-setup">
+    <div class="card">
+      <div class="card-title">إعداد الفصل الدراسي</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">حدد بداية الفصل ونهايته وسيتم احتساب الأسابيع تلقائياً.</p>
+      <div class="grid2">
+        <div class="field">
+          <label>تاريخ بداية الفصل</label>
+          <input type="date" id="f-sem-start" />
+        </div>
+        <div class="field">
+          <label>تاريخ نهاية الفصل</label>
+          <input type="date" id="f-sem-end" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="btn-calc-weeks">احتساب الأسابيع</button>
+      </div>
+      <div id="weeks-preview"></div>
+    </div>
+  </section>
 
+  <!-- ===================== SCREEN: MEMBERS ===================== -->
+  <section class="screen" id="screen-members">
     <div class="card">
       <div class="card-title">إضافة عضو خارجي</div>
 
@@ -39,8 +67,6 @@
         </div>
       </div>
 
-      <div class="divider"></div>
-
       <div class="grid2">
         <div class="field">
           <label>اسم المقرر</label>
@@ -52,43 +78,17 @@
         </div>
       </div>
 
-      <div class="grid2">
-        <div class="field">
-          <label>رقم الشعبة</label>
-          <input type="text" id="f-section" placeholder="201" />
-        </div>
-        <div class="field">
-          <label>عدد المحاضرات / أسبوع</label>
-          <select id="f-lec">
-            <option value="1">1 محاضرة</option>
-            <option value="2">2 محاضرتان</option>
-            <option value="3">3 محاضرات</option>
-          </select>
-        </div>
+      <div class="field" style="max-width:48%">
+        <label>رقم الشعبة</label>
+        <input type="text" id="f-section" placeholder="201" />
       </div>
 
       <div class="divider"></div>
 
       <div class="field">
-        <label>أيام المحاضرة</label>
-        <div class="days-row" id="days-sel">
-          <button class="day-btn" type="button">الأحد</button>
-          <button class="day-btn" type="button">الاثنين</button>
-          <button class="day-btn" type="button">الثلاثاء</button>
-          <button class="day-btn" type="button">الأربعاء</button>
-          <button class="day-btn" type="button">الخميس</button>
-        </div>
-      </div>
-
-      <div class="grid2">
-        <div class="field">
-          <label>وقت البداية</label>
-          <input type="time" id="f-start" value="08:00" />
-        </div>
-        <div class="field">
-          <label>وقت النهاية</label>
-          <input type="time" id="f-end" value="09:30" />
-        </div>
+        <label>أيام المحاضرة مع التوقيت</label>
+        <div id="day-time-rows"></div>
+        <button class="btn btn-ghost" id="btn-add-day" style="margin-top:8px;font-size:13px">+ إضافة يوم آخر</button>
       </div>
 
       <div class="form-actions">
@@ -115,13 +115,11 @@
           </div>
           <button class="week-arrow" id="next-week">›</button>
         </div>
-        <span class="week-counter" id="week-counter">1 / 18</span>
+        <span class="week-counter" id="week-counter">1 / —</span>
       </div>
-
       <div id="attendance-list" class="attendance-list">
         <div class="empty-state">أضف أعضاء أولاً من تبويب الأعضاء</div>
       </div>
-
       <div class="form-actions">
         <button class="btn btn-primary" id="btn-save-week">حفظ سجل الأسبوع</button>
       </div>
@@ -144,21 +142,14 @@
         <div class="stat-label">متوسط الحضور</div>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">تفاصيل الحضور لكل عضو</div>
-      <div id="report-list">
-        <div class="empty-state">لا توجد بيانات بعد</div>
-      </div>
+      <div id="report-list"><div class="empty-state">لا توجد بيانات بعد</div></div>
     </div>
-
-    <div class="card" id="alerts-card">
+    <div class="card">
       <div class="card-title">تنبيهات تحتاج متابعة</div>
-      <div id="alerts-list">
-        <div class="empty-state">لا توجد تنبيهات</div>
-      </div>
+      <div id="alerts-list"><div class="empty-state">لا توجد تنبيهات</div></div>
     </div>
-
     <div class="form-actions">
       <button class="btn btn-primary" id="btn-export">تصدير Excel</button>
       <button class="btn btn-ghost" id="btn-reset">إعادة ضبط البيانات</button>
@@ -167,7 +158,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-
 <script src="app.js"></script>
 </body>
 </html>
