@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>متابعة حضور الأعضاء الخارجيين</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app">
+  <header class="app-header">
+    <div class="header-inner">
+      <h1>متابعة حضور الأعضاء الخارجيين</h1>
+      <span class="semester-badge">الفصل الدراسي — 18 أسبوع</span>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <button class="nav-btn active" data-screen="members">الأعضاء</button>
+    <button class="nav-btn" data-screen="attendance">الحضور الأسبوعي</button>
+    <button class="nav-btn" data-screen="report">التقارير</button>
+  </nav>
+
+  <!-- ===================== SCREEN: MEMBERS ===================== -->
+  <section class="screen active" id="screen-members">
+
+    <div class="card">
+      <div class="card-title">إضافة عضو خارجي</div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>الاسم الكامل</label>
+          <input type="text" id="f-name" placeholder="د. محمد العتيبي" />
+        </div>
+        <div class="field">
+          <label>الكلية</label>
+          <input type="text" id="f-college" placeholder="كلية الطب" />
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>اسم المقرر</label>
+          <input type="text" id="f-course" placeholder="علم الأحياء الدقيقة" />
+        </div>
+        <div class="field">
+          <label>رمز المقرر</label>
+          <input type="text" id="f-code" placeholder="BIOL 302" />
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>رقم الشعبة</label>
+          <input type="text" id="f-section" placeholder="201" />
+        </div>
+        <div class="field">
+          <label>عدد المحاضرات / أسبوع</label>
+          <select id="f-lec">
+            <option value="1">1 محاضرة</option>
+            <option value="2">2 محاضرتان</option>
+            <option value="3">3 محاضرات</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>أيام المحاضرة</label>
+        <div class="days-row" id="days-sel">
+          <button class="day-btn" type="button">الأحد</button>
+          <button class="day-btn" type="button">الاثنين</button>
+          <button class="day-btn" type="button">الثلاثاء</button>
+          <button class="day-btn" type="button">الأربعاء</button>
+          <button class="day-btn" type="button">الخميس</button>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>وقت البداية</label>
+          <input type="time" id="f-start" value="08:00" />
+        </div>
+        <div class="field">
+          <label>وقت النهاية</label>
+          <input type="time" id="f-end" value="09:30" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" id="btn-add">إضافة عضو</button>
+        <button class="btn btn-ghost" id="btn-clear">مسح الحقول</button>
+      </div>
+    </div>
+
+    <div class="section-label" id="members-count-label">الأعضاء المسجلون (0)</div>
+    <div id="members-list" class="members-list">
+      <div class="empty-state">لا يوجد أعضاء بعد — أضف أول عضو من الأعلى</div>
+    </div>
+  </section>
+
+  <!-- ===================== SCREEN: ATTENDANCE ===================== -->
+  <section class="screen" id="screen-attendance">
+    <div class="card">
+      <div class="week-header">
+        <div class="week-nav">
+          <button class="week-arrow" id="prev-week">‹</button>
+          <div class="week-info">
+            <span class="week-label" id="week-label">الأسبوع 1</span>
+            <span class="week-date" id="week-date"></span>
+          </div>
+          <button class="week-arrow" id="next-week">›</button>
+        </div>
+        <span class="week-counter" id="week-counter">1 / 18</span>
+      </div>
+
+      <div id="attendance-list" class="attendance-list">
+        <div class="empty-state">أضف أعضاء أولاً من تبويب الأعضاء</div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" id="btn-save-week">حفظ سجل الأسبوع</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== SCREEN: REPORT ===================== -->
+  <section class="screen" id="screen-report">
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-weeks">0</div>
+        <div class="stat-label">أسابيع مسجلة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-members">0</div>
+        <div class="stat-label">أعضاء نشطين</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-avg">—</div>
+        <div class="stat-label">متوسط الحضور</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">تفاصيل الحضور لكل عضو</div>
+      <div id="report-list">
+        <div class="empty-state">لا توجد بيانات بعد</div>
+      </div>
+    </div>
+
+    <div class="card" id="alerts-card">
+      <div class="card-title">تنبيهات تحتاج متابعة</div>
+      <div id="alerts-list">
+        <div class="empty-state">لا توجد تنبيهات</div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" id="btn-export">تصدير Excel</button>
+      <button class="btn btn-ghost" id="btn-reset">إعادة ضبط البيانات</button>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
