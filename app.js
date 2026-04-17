@@ -55,6 +55,7 @@ function attendanceStats(memberId) {
   Object.keys(state.attendance).forEach(w=>{
     const wData=state.attendance[w];
     if (!wData) return;
+    // count only keys that belong to this member
     const keys=Object.keys(wData).filter(k=>k===memberId||k.startsWith(memberId+"_"));
     if (!keys.length) return;
     keys.forEach(k=>{ totalSlots++; if(wData[k]===true) presentSlots++; });
@@ -180,75 +181,101 @@ function goToWeek(num) {
 function openWeekModal(num) {
   const wk    = state.weeks[num-1];
   const wData = state.attendance["week"+num] || {};
-  const hol   = state.holidays["week"+num];
+  const hol   = state.holidays["week"+num]   || {};
 
+  // Title
   document.getElementById("modal-week-title").textContent =
     "الأسبوع " + num + (wk ? " — " + wk.label : "");
 
+  // Holiday banner
   const holEl = document.getElementById("modal-holiday");
-  if (hol && hol.isHoliday) {
-    holEl.style.display = "block";
-    holEl.textContent   = "🏖️ إجازة رسمية" + (hol.note ? " — " + hol.note : "");
+  if (hol.isHoliday) {
+    holEl.style.display="block";
+    holEl.textContent="🏖️ إجازة رسمية" + (hol.note ? " — "+hol.note : "");
   } else {
-    holEl.style.display = "none";
+    holEl.style.display="none";
   }
 
   const hasSaved = Object.keys(wData).length > 0;
-
   if (!hasSaved) {
     document.getElementById("modal-body").innerHTML =
       '<div class="modal-not-recorded">📋 لم يُسجَّل حضور لهذا الأسبوع بعد</div>';
-    document.getElementById("week-modal-overlay").style.display = "flex";
+    document.getElementById("week-modal-overlay").style.display="flex";
     return;
   }
 
-  // filter correctly — direct memberId key
-  const absentees = state.members.filter(m => wData[m.id] === false);
-  const present   = state.members.filter(m => wData[m.id] === true);
-  const unset     = state.members.filter(m => !(m.id in wData));
+  // Build per-lecture absent/present lists
+  // key format: memberId or memberId_lectureIndex
+  const absentMembers  = [];  // { member, lectures[] }
+  const presentMembers = [];
 
-  function memberRow(m, status) {
-    const badge = status === "absent"
-      ? '<span class="badge badge-danger">غائب</span>'
-      : '<span class="badge badge-success">حاضر</span>';
-    const rowCls = status === "absent" ? "absent-row" : "";
-    const schedDetail = (m.schedule || []).map(s =>
+  state.members.forEach(m => {
+    const sched = m.schedule || [];
+    // collect all lecture keys for this member
+    const lectureEntries = sched.map((s, idx) => {
+      const key = m.id + "_" + idx;
+      // also try plain memberId for old format
+      const val = key in wData ? wData[key] : (m.id in wData ? wData[m.id] : undefined);
+      return { s, key, val };
+    });
+
+    const recorded = lectureEntries.some(e => e.val !== undefined);
+    if (!recorded) return;
+
+    const absentLectures  = lectureEntries.filter(e => e.val === false);
+    const presentLectures = lectureEntries.filter(e => e.val === true);
+
+    if (absentLectures.length > 0)  absentMembers.push({ m, absentLectures, presentLectures });
+    else if (presentLectures.length > 0) presentMembers.push({ m, presentLectures });
+  });
+
+  function lectureChips(lectures) {
+    return lectures.map(({s}) =>
       '<div class="modal-sched-line">' +
-        '<span class="mchip day">' + s.day + '</span>' +
-        '<span class="mchip">' + (s.course||"—") + '</span>' +
-        '<span class="mchip">شعبة ' + (s.section||"—") + '</span>' +
+        '<span class="mchip day">'  + s.day + '</span>' +
+        '<span class="mchip">'      + (s.course||"—") + '</span>' +
+        '<span class="mchip">شعبة '+ (s.section||"—") + '</span>' +
         '<span class="mchip room">' + (s.room||"—") + '</span>' +
         '<span class="mchip time">⏰ ' + (s.start||"") + "–" + (s.end||"") + '</span>' +
       '</div>'
     ).join("");
-    return '<div class="modal-member-block ' + rowCls + '">' +
+  }
+
+  function memberBlock(m, absentL, presentL) {
+    const hasAbsent  = absentL  && absentL.length  > 0;
+    const hasPresent = presentL && presentL.length > 0;
+    return '<div class="modal-member-block' + (hasAbsent ? " absent-row" : "") + '">' +
       '<div class="modal-member-top">' +
         '<div class="avatar-sm">' + initials(m.name) + '</div>' +
         '<div style="flex:1;min-width:0">' +
           '<div class="modal-mname">' + m.name + '</div>' +
           '<div class="modal-mcollege">' + (m.college||"كلية العلوم") + '</div>' +
         '</div>' +
-        badge +
+        (hasAbsent
+          ? '<span class="badge badge-danger">غائب ('+(absentL.length)+' محاضرة)</span>'
+          : '<span class="badge badge-success">حاضر</span>') +
       '</div>' +
-      '<div class="modal-sched-wrap">' + schedDetail + '</div>' +
+      (hasAbsent ? '<div class="modal-sched-wrap absent-sched"><div class="modal-mini-label">المحاضرات الغائبة:</div>' + lectureChips(absentL) + '</div>' : "") +
+      (hasAbsent && hasPresent ? '<div class="modal-sched-wrap present-sched"><div class="modal-mini-label">المحاضرات الحاضرة:</div>' + lectureChips(presentL) + '</div>' : "") +
     '</div>';
   }
 
-  let html = '<div class="modal-section-title absent-title">الغائبون (' + absentees.length + ')</div>';
-  html += absentees.length
-    ? absentees.map(m => memberRow(m,"absent")).join("")
-    : '<div class="modal-empty-ok">✓ لا يوجد غائبون</div>';
+  let html = "";
 
-  html += '<div class="modal-section-title present-title">الحاضرون (' + present.length + ')</div>';
-  html += present.map(m => memberRow(m,"present")).join("");
+  // Absent section
+  html += '<div class="modal-section-title absent-title">الغائبون — ' + absentMembers.length + ' عضو</div>';
+  html += absentMembers.length
+    ? absentMembers.map(({m,absentLectures,presentLectures}) =>
+        memberBlock(m, absentLectures, presentLectures)).join("")
+    : '<div class="modal-empty-ok">✓ لا يوجد غائبون في هذا الأسبوع</div>';
 
-  if (unset.length) {
-    html += '<div class="modal-section-title">لم يُسجَّل (' + unset.length + ')</div>';
-    html += unset.map(m => memberRow(m,"unrecorded")).join("");
-  }
+  // Present section
+  html += '<div class="modal-section-title present-title">الحاضرون — ' + presentMembers.length + ' عضو</div>';
+  html += presentMembers.map(({m,presentLectures}) =>
+    memberBlock(m, [], presentLectures)).join("");
 
   document.getElementById("modal-body").innerHTML = html;
-  document.getElementById("week-modal-overlay").style.display = "flex";
+  document.getElementById("week-modal-overlay").style.display="flex";
 }
 
 function closeWeekModal() {
