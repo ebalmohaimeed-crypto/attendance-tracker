@@ -215,3 +215,90 @@ input:focus,select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 
 .empty-state{text-align:center;padding:2rem 1rem;color:var(--text3);font-size:.875rem}
 .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 22px;border-radius:var(--radius-md);font-size:.875rem;font-weight:600;opacity:0;transition:all .3s;z-index:200;white-space:nowrap;box-shadow:0 4px 14px rgba(26,46,110,.35)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== PER-LECTURE ATTENDANCE ===== */
+.attend-member-block{border-bottom:1px solid var(--border);padding:10px 0}
+.attend-member-block:last-child{border-bottom:none}
+.attend-member-name{font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed var(--border)}
+.attend-lecture-row{display:flex;align-items:center;gap:10px;padding:7px 0 7px 8px;border-radius:var(--radius-sm);transition:background .1s}
+.attend-lecture-row:hover{background:var(--surface2)}
+.attend-lecture-row.holiday-row{opacity:.5;pointer-events:none}
+.attend-lecture-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+
+/* ===== WEEK CHIP STATES ===== */
+.week-chip-recorded {
+  background: #e6faf6;
+  border-color: #6ee7b7;
+}
+.week-chip-recorded:hover { background: #d0f5ec; border-color: #34d399; }
+.week-chip-recorded .week-chip-num { background: var(--mint); }
+
+.present-tag {
+  font-size:.65rem;
+  background: var(--mint);
+  color:#fff;
+  padding:1px 7px;
+  border-radius:10px;
+  font-weight:700;
+}
+.absent-tag {
+  font-size:.65rem;
+  background: var(--red);
+  color:#fff;
+  padding:1px 7px;
+  border-radius:10px;
+  font-weight:700;
+}
+
+/* ===== MODAL IMPROVEMENTS ===== */
+.modal-not-recorded {
+  display:flex; align-items:center; gap:10px;
+  padding:1.25rem 1.5rem;
+  color:var(--muted); font-size:.9rem;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+}
+.modal-empty-ok {
+  padding:.6rem 1.25rem;
+  font-size:.82rem; color:var(--green-text);
+  background:var(--green-bg);
+  border-bottom:1px solid var(--border);
+}
+.modal-section-title {
+  font-size:.75rem; font-weight:700;
+  color:var(--muted); letter-spacing:.06em;
+  padding:8px 1.25rem;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border);
+  border-top:1px solid var(--border);
+  margin-top:4px;
+}
+.absent-title  { color:var(--red-text);  background:#fff5f5; }
+.present-title { color:var(--green-text); background:#f0fdf9; }
+
+.modal-member-block {
+  padding:10px 1.25rem;
+  border-bottom:1px solid var(--border);
+}
+.modal-member-block:last-child { border-bottom:none; }
+.modal-member-block.absent-row { background:#fff8f8; }
+
+.modal-member-top {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom:6px;
+}
+.modal-mname    { font-size:.88rem; font-weight:700; color:var(--text); }
+.modal-mcollege { font-size:.72rem; color:var(--muted); margin-top:1px; }
+
+.modal-sched-wrap { display:flex; flex-direction:column; gap:4px; padding-right:42px; }
+.modal-sched-line { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
+
+.mchip {
+  font-size:.7rem; padding:2px 8px; border-radius:12px;
+  background:var(--surface2); color:var(--muted);
+  border:1px solid var(--border); font-weight:500;
+  white-space:nowrap;
+}
+.mchip.day  { background:var(--amber-bg);  color:var(--amber-text); border-color:#fcd34d; font-weight:700; }
+.mchip.room { background:var(--primary-light); color:var(--navy); }
+.mchip.time { background:var(--green-bg);  color:var(--green-text); }
